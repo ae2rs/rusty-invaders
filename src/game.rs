@@ -1,3 +1,4 @@
+use crate::enemy::Enemy;
 use crate::perf::FrameTimer;
 use crate::player::Player;
 use crate::render::{Pixel, Sprite};
@@ -47,13 +48,26 @@ impl Game {
 
         let mut player = Player::new();
         let mut pshots = Vec::new();
+        let mut enemies = Vec::with_capacity(10);
+
+        for i in 0..11 {
+            enemies.push(Enemy::new((2 + (Enemy::ENEMY_SPRITE_WIDTH + 2) * i, 2)));
+            enemies.push(Enemy::new((
+                5 + (Enemy::ENEMY_SPRITE_WIDTH + 2) * i,
+                2 + Enemy::ENEMY_SPRITE_HEIGHT + 2,
+            )));
+            enemies.push(Enemy::new((
+                2 + (Enemy::ENEMY_SPRITE_WIDTH + 2) * i,
+                2 + (Enemy::ENEMY_SPRITE_HEIGHT + 2) * 2,
+            )));
+        }
 
         loop {
             frame_timer.begin_frame();
 
             self.handle_input(&mut player, &mut pshots);
             self.update(&mut pshots);
-            self.render(&mut player, &mut pshots);
+            self.render(&mut player, &mut pshots, &mut enemies);
 
             if let Some(fps) = frame_timer.end_frame() {
                 println!("FPS: {fps:.1}");
@@ -80,14 +94,15 @@ impl Game {
         pshots.retain_mut(|shot| shot.translate());
     }
 
-    fn render(&mut self, player: &mut Player, pshots: &mut Vec<Shot>) {
-        self.draw_screen(player, pshots);
+    fn render(&mut self, player: &mut Player, pshots: &mut Vec<Shot>, enemy: &mut Vec<Enemy>) {
+        self.draw_screen(player, pshots, enemy);
         self.render_frame();
     }
 
     fn render_frame(&mut self) {
         let size = self.window.get_size();
         let mut buffer = DrawTarget::new(size.0 as i32, size.1 as i32);
+
         for (row, pixels) in self.screen.iter().enumerate() {
             for (col, pixel) in pixels.iter().enumerate().filter(|p| p.1.is_some()) {
                 let pixel = pixel.unwrap();
@@ -119,10 +134,14 @@ impl Game {
         }
     }
 
-    fn draw_screen(&mut self, player: &Player, pshots: &mut Vec<Shot>) {
+    fn draw_screen(&mut self, player: &Player, pshots: &mut Vec<Shot>, enemy: &mut Vec<Enemy>) {
         self.clear_screen();
 
         self.draw_sprite_at(player.pos(), player.sprite());
+
+        for e in enemy {
+            self.draw_sprite_at(e.pos(), &e.sprite());
+        }
 
         for s in pshots {
             self.draw_sprite_at(s.pos(), &s.sprite());
