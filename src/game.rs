@@ -70,7 +70,21 @@ impl Game {
         }
     }
 
-    fn handle_input(&mut self) {}
+    fn handle_input(&mut self) {
+        let keys = self.window.get_keys();
+        let player = self.player();
+
+        for key in keys {
+            match key {
+                Key::Left => player.set_velocity((-1, 0)),
+                Key::Right => player.set_velocity((1, 0)),
+                Key::Space => {
+                    println!("Shoot!!");
+                }
+                _ => {}
+            }
+        }
+    }
 
     fn update(&mut self) {}
 
@@ -78,8 +92,21 @@ impl Game {
         let size = self.window.get_size();
         let mut buffer = raqote::DrawTarget::new(size.0 as i32, size.1 as i32);
 
+        for entity in &self.world.entities {
+            entity.render(&mut buffer);
+        }
+
         self.window
             .update_with_buffer(buffer.get_data(), size.0, size.1)
             .unwrap();
+    }
+
+    fn player(&mut self) -> &mut Player {
+        self.world
+            .entities
+            .get_mut(0)
+            .expect("Player not found")
+            .as_player_mut()
+            .expect("Player not found")
     }
 }

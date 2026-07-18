@@ -37,10 +37,27 @@ impl Entity {
         }
     }
 
-    pub fn sprite(&self) -> &Sprite {
+    pub fn render(&self, buffer: &mut raqote::DrawTarget) {
         match self {
-            Entity::Player(player) => player.sprite(),
-            Entity::Bullet(bullet) => bullet.sprite(),
+            Entity::Player(player) => player.sprite().render(player.pos(), buffer),
+            Entity::Bullet(bullet) => bullet.sprite().render(bullet.pos(), buffer),
+        }
+    }
+}
+
+// Player specific
+impl Entity {
+    pub fn as_player(&self) -> Option<&Player> {
+        match self {
+            Entity::Player(player) => Some(player),
+            _ => None,
+        }
+    }
+
+    pub fn as_player_mut(&mut self) -> Option<&mut Player> {
+        match self {
+            Entity::Player(player) => Some(player),
+            _ => None,
         }
     }
 }
