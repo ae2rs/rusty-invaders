@@ -9,7 +9,6 @@ use crate::shot::{Shot, ShotType};
 
 const PLAYER_MIN_POS: usize = 2;
 const PLAYER_MAX_POS: usize = WINDOW_PIXEL_WIDTH - SHIP_WIDTH - 2;
-
 const PLAYER_SHOT_INTERVAL: u128 = 200;
 
 #[derive(Debug)]
@@ -62,7 +61,7 @@ impl Player {
         self.pos
     }
 
-    pub fn sprite(&self) -> Sprite {
-        self.sprite.clone()
+    pub fn sprite(&self) -> &Sprite {
+        &self.sprite
     }
 }

@@ -17,9 +17,6 @@ const TICK_DURATION: u64 = 10;
 pub struct Game {
     window: Window,
     screen: Vec<Vec<Option<Pixel>>>,
-
-    player: Player,
-    pshots: Vec<Shot>,
 }
 
 impl Game {
@@ -35,19 +32,12 @@ impl Game {
         )
         .unwrap();
 
-        let player = Player::new();
-
         let mut screen = Vec::with_capacity(WINDOW_PIXEL_HEIGHT);
         for _ in 0..WINDOW_PIXEL_HEIGHT {
             screen.push(Vec::from([None; WINDOW_PIXEL_WIDTH]));
         }
 
-        let game = Self {
-            window,
-            player,
-            screen,
-            pshots: Vec::new(),
-        };
+        let game = Self { window, screen };
 
         game
     }
@@ -55,12 +45,15 @@ impl Game {
     pub fn run(&mut self) {
         let mut frame_timer = FrameTimer::new(Duration::from_millis(TICK_DURATION));
 
+        let mut player = Player::new();
+        let mut pshots = Vec::new();
+
         loop {
             frame_timer.begin_frame();
 
-            self.handle_input();
-            self.update();
-            self.render();
+            self.handle_input(&mut player, &mut pshots);
+            self.update(&mut pshots);
+            self.render(&mut player, &mut pshots);
 
             if let Some(fps) = frame_timer.end_frame() {
                 println!("FPS: {fps:.1}");
@@ -68,14 +61,14 @@ impl Game {
         }
     }
 
-    fn handle_input(&mut self) {
+    fn handle_input(&mut self, player: &mut Player, pshots: &mut Vec<Shot>) {
         for key in self.window.get_keys() {
             match key {
-                Key::Left => self.player.left(),
-                Key::Right => self.player.right(),
+                Key::Left => player.left(),
+                Key::Right => player.right(),
                 Key::Space => {
-                    if let Some(shot) = self.player.shoot() {
-                        self.pshots.push(shot);
+                    if let Some(shot) = player.shoot() {
+                        pshots.push(shot);
                     }
                 }
                 _ => {}
@@ -83,12 +76,12 @@ impl Game {
         }
     }
 
-    fn update(&mut self) {
-        self.pshots.retain_mut(|shot| shot.translate());
+    fn update(&self, pshots: &mut Vec<Shot>) {
+        pshots.retain_mut(|shot| shot.translate());
     }
 
-    fn render(&mut self) {
-        self.draw_screen();
+    fn render(&mut self, player: &mut Player, pshots: &mut Vec<Shot>) {
+        self.draw_screen(player, pshots);
         self.render_frame();
     }
 
@@ -126,14 +119,14 @@ impl Game {
         }
     }
 
-    fn draw_screen(&mut self) {
+    fn draw_screen(&mut self, player: &Player, pshots: &mut Vec<Shot>) {
         self.clear_screen();
 
-        self.draw_sprite_at(self.player.pos(), &self.player.sprite());
+        self.draw_sprite_at(player.pos(), player.sprite());
 
-        // for s in &self.pshots {
-        //     s.draw(&mut self.screen);
-        // }
+        for s in pshots {
+            self.draw_sprite_at(s.pos(), &s.sprite());
+        }
     }
 
     fn clear_screen(&mut self) {

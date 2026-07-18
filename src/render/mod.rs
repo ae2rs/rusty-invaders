@@ -1,5 +1,4 @@
 mod color;
-mod draw;
 mod pixel;
 mod sprite;
 
