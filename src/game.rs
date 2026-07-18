@@ -1,6 +1,6 @@
 use crate::alien::Enemy;
 use crate::entity::Entity;
-use crate::perf::FrameTimer;
+use crate::perf::{FrameTimer, TickTimer};
 use crate::player::Player;
 
 use minifb::{Key, Window, WindowOptions};
@@ -10,7 +10,7 @@ pub const WINDOW_PIXEL_WIDTH: usize = 150;
 pub const WINDOW_PIXEL_HEIGHT: usize = 100;
 
 const PIXEL_SIZE: usize = 6;
-const TICK_DURATION: u64 = 10;
+const TICK_DURATION: Duration = Duration::from_millis(10);
 
 pub struct Game {
     window: Window,
@@ -53,12 +53,15 @@ impl Game {
     }
 
     pub fn run(&mut self) {
-        let mut frame_timer = FrameTimer::new(Duration::from_millis(TICK_DURATION));
+        let mut frame_timer = FrameTimer::new();
+        let mut tick_timer = TickTimer::new(TICK_DURATION);
 
         loop {
-            frame_timer.begin_frame();
+            while tick_timer.consume_tick() {
+                self.handle_input();
+                self.update();
+            }
 
-            self.handle_input();
             self.render();
 
             if let Some(fps) = frame_timer.end_frame() {
@@ -68,6 +71,8 @@ impl Game {
     }
 
     fn handle_input(&mut self) {}
+
+    fn update(&mut self) {}
 
     fn render(&mut self) {}
 }
