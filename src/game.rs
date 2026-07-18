@@ -1,7 +1,6 @@
-use crate::alien::Enemy;
 use crate::entity::Entity;
 use crate::perf::{FrameTimer, TickTimer};
-use crate::player::Player;
+use crate::player::{PLAYER_MAX_POS, PLAYER_MIN_POS, Player};
 
 use minifb::{Key, Window, WindowOptions};
 use std::time::Duration;
@@ -76,8 +75,8 @@ impl Game {
 
         for key in keys {
             match key {
-                Key::Left => player.set_velocity((-1, 0)),
-                Key::Right => player.set_velocity((1, 0)),
+                Key::Left => player.set_velocity((1, 0)),
+                Key::Right => player.set_velocity((-1, 0)),
                 Key::Space => {
                     println!("Shoot!!");
                 }
@@ -86,7 +85,35 @@ impl Game {
         }
     }
 
-    fn update(&mut self) {}
+    fn update(&mut self) {
+        for entity in &mut self.world.entities {
+            let velocity = entity.velocity();
+
+            let mut new_pos = (
+                entity
+                    .pos()
+                    .0
+                    .checked_sub_signed(velocity.0 as isize)
+                    .unwrap_or(0),
+                entity
+                    .pos()
+                    .1
+                    .checked_sub_signed(velocity.1 as isize)
+                    .unwrap_or(0),
+            );
+
+            if entity.is_player() {
+                if new_pos.0 < PLAYER_MIN_POS {
+                    new_pos.0 = PLAYER_MIN_POS;
+                } else if new_pos.0 > PLAYER_MAX_POS {
+                    new_pos.0 = PLAYER_MAX_POS;
+                }
+            }
+
+            entity.set_pos(new_pos);
+            entity.set_velocity((0, 0));
+        }
+    }
 
     fn render(&mut self) {
         let size = self.window.get_size();

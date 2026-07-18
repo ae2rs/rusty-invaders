@@ -7,8 +7,8 @@ use crate::bullet::{Bullet, BulletType};
 use crate::game::{WINDOW_PIXEL_HEIGHT, WINDOW_PIXEL_WIDTH};
 use crate::render::Sprite;
 
-const PLAYER_MIN_POS: usize = 2;
-const PLAYER_MAX_POS: usize = WINDOW_PIXEL_WIDTH - SHIP_WIDTH - 2;
+pub const PLAYER_MIN_POS: usize = 2;
+pub const PLAYER_MAX_POS: usize = WINDOW_PIXEL_WIDTH - SHIP_WIDTH - 2;
 const PLAYER_SHOT_INTERVAL: u128 = 200;
 
 #[derive(Debug)]

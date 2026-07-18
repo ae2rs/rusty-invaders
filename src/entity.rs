@@ -47,6 +47,13 @@ impl Entity {
 
 // Player specific
 impl Entity {
+    pub fn is_player(&self) -> bool {
+        match self {
+            Entity::Player(_) => true,
+            _ => false,
+        }
+    }
+
     pub fn as_player(&self) -> Option<&Player> {
         match self {
             Entity::Player(player) => Some(player),
