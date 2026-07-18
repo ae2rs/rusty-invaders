@@ -1,3 +1,4 @@
+use crate::perf::FrameTimer;
 use crate::player::Player;
 use crate::render::{Pixel, Sprite};
 use crate::shot::Shot;
@@ -5,7 +6,7 @@ use crate::traits::Kinetic;
 
 use minifb::{Key, Window, WindowOptions};
 use raqote::{DrawOptions, DrawTarget, PathBuilder};
-use std::{thread, time};
+use std::time::Duration;
 
 pub const WINDOW_PIXEL_WIDTH: usize = 150;
 pub const WINDOW_PIXEL_HEIGHT: usize = 100;
@@ -52,34 +53,38 @@ impl Game {
     }
 
     pub fn run(&mut self) {
+        let mut frame_timer = FrameTimer::new(Duration::from_millis(TICK_DURATION));
+
         loop {
-            let tick_start = time::Instant::now();
+            frame_timer.begin_frame();
 
-            let keys = self.window.get_keys();
-            for key in keys {
-                match key {
-                    Key::Left => self.player.left(),
-                    Key::Right => self.player.right(),
-                    Key::Space => {
-                        if let Some(shot) = self.player.shoot() {
-                            self.pshots.push(shot);
-                        }
-                    }
-                    _ => (),
-                }
-            }
-
-            self.pshots.retain_mut(|shot| shot.translate());
-
+            self.handle_input();
+            self.update();
             self.render();
 
-            let tick_elapsed = tick_start.elapsed().as_millis();
-            if tick_elapsed < TICK_DURATION as u128 {
-                thread::sleep(time::Duration::from_millis(
-                    TICK_DURATION - tick_elapsed as u64,
-                ));
+            if let Some(fps) = frame_timer.end_frame() {
+                println!("FPS: {fps:.1}");
             }
         }
+    }
+
+    fn handle_input(&mut self) {
+        for key in self.window.get_keys() {
+            match key {
+                Key::Left => self.player.left(),
+                Key::Right => self.player.right(),
+                Key::Space => {
+                    if let Some(shot) = self.player.shoot() {
+                        self.pshots.push(shot);
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    fn update(&mut self) {
+        self.pshots.retain_mut(|shot| shot.translate());
     }
 
     fn render(&mut self) {
