@@ -14,3 +14,6 @@ path = "src/lib.rs"
 [dependencies]
 minifb = "0.28.0"
 raqote = "0.8.5"
+
+[profile.release]
+debug = true

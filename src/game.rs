@@ -31,8 +31,7 @@ impl World {
 
 impl Game {
     pub fn new() -> Self {
-        // minifb window creation
-        let window = Window::new(
+        let mut window = Window::new(
             "Rusty Invaders",
             WINDOW_PIXEL_WIDTH * PIXEL_SIZE,
             WINDOW_PIXEL_HEIGHT * PIXEL_SIZE,
@@ -41,6 +40,7 @@ impl Game {
             },
         )
         .unwrap();
+        window.set_target_fps(0);
 
         let player = Player::new();
 
@@ -74,5 +74,12 @@ impl Game {
 
     fn update(&mut self) {}
 
-    fn render(&mut self) {}
+    fn render(&mut self) {
+        let size = self.window.get_size();
+        let mut buffer = raqote::DrawTarget::new(size.0 as i32, size.1 as i32);
+
+        self.window
+            .update_with_buffer(buffer.get_data(), size.0, size.1)
+            .unwrap();
+    }
 }
