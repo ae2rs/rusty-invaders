@@ -1,5 +1,6 @@
 use crate::asset::sprite::shot::SCHEMA as SHOT_SCHEMA;
 use crate::render::Sprite;
+use crate::uid::EntityUid;
 use crate::{game::WINDOW_PIXEL_HEIGHT, traits::Kinetic};
 
 pub enum BulletType {
@@ -8,6 +9,8 @@ pub enum BulletType {
 }
 
 pub struct Bullet {
+    uid: EntityUid,
+
     pos: (usize, usize),
     dims: (usize, usize),
     velocity: (isize, isize),
@@ -17,11 +20,12 @@ pub struct Bullet {
 }
 
 impl Bullet {
-    pub fn new(pos: (usize, usize), bullet_type: BulletType) -> Self {
+    pub fn new(id: EntityUid, pos: (usize, usize), bullet_type: BulletType) -> Self {
         Self {
+            uid: id,
             pos,
             dims: (1, 2),
-            velocity: (0, 1),
+            velocity: (0, -1),
             sprite: Sprite::from_asset(
                 &SHOT_SCHEMA[..]
                     .iter()
@@ -30,6 +34,10 @@ impl Bullet {
             ),
             bullet_type,
         }
+    }
+
+    pub fn uid(&self) -> EntityUid {
+        self.uid
     }
 
     pub fn pos(&self) -> (usize, usize) {

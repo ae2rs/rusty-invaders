@@ -1,5 +1,6 @@
 mod asset;
 mod render;
+mod uid;
 
 mod alien;
 mod bullet;

@@ -1,5 +1,6 @@
 use crate::bullet::Bullet;
 use crate::player::Player;
+use crate::uid::EntityUid;
 
 pub enum Entity {
     Player(Player),
@@ -8,6 +9,13 @@ pub enum Entity {
 }
 
 impl Entity {
+    pub fn uid(&self) -> EntityUid {
+        match self {
+            Entity::Player(player) => player.uid(),
+            Entity::Bullet(bullet) => bullet.uid(),
+        }
+    }
+
     pub fn pos(&self) -> (usize, usize) {
         match self {
             Entity::Player(player) => player.pos(),
@@ -38,8 +46,12 @@ impl Entity {
 
     pub fn render(&self, buffer: &mut raqote::DrawTarget) {
         match self {
-            Entity::Player(player) => player.sprite().render(player.pos(), buffer),
-            Entity::Bullet(bullet) => bullet.sprite().render(bullet.pos(), buffer),
+            Entity::Player(player) => player
+                .sprite()
+                .render((player.pos().0 as isize, player.pos().1 as isize), buffer),
+            Entity::Bullet(bullet) => bullet
+                .sprite()
+                .render((bullet.pos().0 as isize, bullet.pos().1 as isize), buffer),
         }
     }
 }

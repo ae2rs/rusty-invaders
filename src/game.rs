@@ -1,6 +1,8 @@
+use crate::bullet::{Bullet, BulletType};
 use crate::entity::Entity;
 use crate::perf::{FrameTimer, TickTimer};
 use crate::player::{PLAYER_MAX_POS, PLAYER_MIN_POS, Player};
+use crate::uid::{EntityUid, UidGenerator};
 
 use minifb::{Key, Window, WindowOptions};
 use std::time::Duration;
@@ -13,6 +15,7 @@ const TICK_DURATION: Duration = Duration::from_millis(10);
 
 pub struct Game {
     window: Window,
+    uid_generator: UidGenerator,
     world: World,
 }
 
@@ -41,12 +44,18 @@ impl Game {
         .unwrap();
         window.set_target_fps(0);
 
-        let player = Player::new();
+        let mut uid_generator = UidGenerator::default();
+
+        let player = Player::new(uid_generator.generate());
 
         let mut world = World::new();
         world.entities.push(Entity::Player(player));
 
-        let game = Self { window, world };
+        let game = Self {
+            window,
+            uid_generator,
+            world,
+        };
 
         game
     }
@@ -71,7 +80,8 @@ impl Game {
 
     fn handle_input(&mut self) {
         let keys = self.window.get_keys();
-        let mut bullet = None;
+        let mut can_shoot = false;
+        let mut bullet_id = None;
         let mut left_pressed = false;
         let mut right_pressed = false;
 
@@ -82,50 +92,62 @@ impl Game {
                 match key {
                     Key::Left | Key::A => left_pressed = true,
                     Key::Right | Key::D => right_pressed = true,
-                    Key::Space => bullet = player.shoot(),
+                    Key::Space => can_shoot = player.can_shoot(),
                     _ => {}
                 }
             }
 
             match (left_pressed, right_pressed) {
-                (true, false) => player.set_velocity((1, 0)),
-                (false, true) => player.set_velocity((-1, 0)),
+                (true, false) => player.set_velocity((-1, 0)),
+                (false, true) => player.set_velocity((1, 0)),
                 _ => player.set_velocity((0, 0)),
             }
         }
 
-        if let Some(bullet) = bullet {
+        if can_shoot {
+            bullet_id = Some(self.uid_generator.generate());
+        }
+
+        if let Some(bullet_id) = bullet_id {
+            let player = self.player();
+            let bullet = Bullet::new(
+                bullet_id,
+                (player.pos().0 + player.dims().0 / 2, player.pos().1),
+                BulletType::Player,
+            );
             self.world.entities.push(Entity::Bullet(bullet));
         }
     }
 
     fn update(&mut self) {
-        for entity in &mut self.world.entities {
+        let mut dead_entity_uids: Vec<EntityUid> = Vec::new();
+
+        for entity in self.world.entities.iter_mut() {
             let velocity = entity.velocity();
 
             let mut new_pos = (
-                entity
-                    .pos()
-                    .0
-                    .checked_sub_signed(velocity.0 as isize)
-                    .unwrap_or(0),
-                entity
-                    .pos()
-                    .1
-                    .checked_sub_signed(velocity.1 as isize)
-                    .unwrap_or(0),
+                entity.pos().0 as isize + velocity.0,
+                entity.pos().1 as isize + velocity.1,
             );
 
             if entity.is_player() {
-                if new_pos.0 < PLAYER_MIN_POS {
-                    new_pos.0 = PLAYER_MIN_POS;
-                } else if new_pos.0 > PLAYER_MAX_POS {
-                    new_pos.0 = PLAYER_MAX_POS;
+                if new_pos.0 < PLAYER_MIN_POS as isize {
+                    new_pos.0 = PLAYER_MIN_POS as isize;
+                } else if new_pos.0 > PLAYER_MAX_POS as isize {
+                    new_pos.0 = PLAYER_MAX_POS as isize;
+                }
+            } else {
+                if new_pos.0 < 0 || new_pos.0 >= WINDOW_PIXEL_WIDTH as isize {
+                    dead_entity_uids.push(entity.uid());
                 }
             }
 
-            entity.set_pos(new_pos);
+            entity.set_pos((new_pos.0 as usize, new_pos.1 as usize));
         }
+
+        self.world
+            .entities
+            .retain(|entity| !dead_entity_uids.contains(&entity.uid()));
     }
 
     fn render(&mut self) {
