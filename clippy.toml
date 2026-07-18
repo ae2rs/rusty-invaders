@@ -1,0 +1,10 @@
+disallowed-methods = []
+
+future-size-threshold = 4000
+
+allow-dbg-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-print-in-tests = true
+allow-unwrap-in-tests = true
+enum-variant-size-threshold = 300

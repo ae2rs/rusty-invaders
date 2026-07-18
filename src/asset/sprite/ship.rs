@@ -1,6 +1,6 @@
-const HEIGHT: usize = 8;
-const WIDTH: usize = 15;
-const SCHEMA: [[u8; WIDTH]; HEIGHT] = [
+pub const HEIGHT: usize = 8;
+pub const WIDTH: usize = 15;
+pub const SCHEMA: [[u8; WIDTH]; HEIGHT] = [
     [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],

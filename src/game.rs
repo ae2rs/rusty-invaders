@@ -1,9 +1,10 @@
 use crate::player::Player;
-use crate::traits::{Draw, Kinetic};
-use crate::{pixel::Pixel, shot::Shot};
+use crate::render::{Pixel, Sprite};
+use crate::shot::Shot;
+use crate::traits::Kinetic;
 
 use minifb::{Key, Window, WindowOptions};
-use raqote::{DrawOptions, DrawTarget, PathBuilder, SolidSource, Source};
+use raqote::{DrawOptions, DrawTarget, PathBuilder};
 use std::{thread, time};
 
 pub const WINDOW_PIXEL_WIDTH: usize = 150;
@@ -40,7 +41,7 @@ impl Game {
             screen.push(Vec::from([None; WINDOW_PIXEL_WIDTH]));
         }
 
-        let mut game = Self {
+        let game = Self {
             window,
             player,
             screen,
@@ -83,7 +84,10 @@ impl Game {
 
     fn render(&mut self) {
         self.draw_screen();
+        self.render_frame();
+    }
 
+    fn render_frame(&mut self) {
         let size = self.window.get_size();
         let mut buffer = DrawTarget::new(size.0 as i32, size.1 as i32);
         for (row, pixels) in self.screen.iter().enumerate() {
@@ -97,14 +101,8 @@ impl Game {
                     PIXEL_SIZE as f32,
                 );
                 let path = pb.finish();
-                let argb = pixel.color().argb();
-                buffer.fill(
-                    &path,
-                    &Source::Solid(SolidSource::from_unpremultiplied_argb(
-                        argb.0, argb.1, argb.2, argb.3,
-                    )),
-                    &DrawOptions::new(),
-                );
+                let pixel_color = pixel.color();
+                buffer.fill(&path, &pixel_color.source(), &DrawOptions::new());
             }
         }
 
@@ -113,14 +111,24 @@ impl Game {
             .unwrap();
     }
 
+    fn draw_sprite_at(&mut self, pos: (usize, usize), sprite: &Sprite) {
+        for (row, pixels) in sprite.pixels().iter().enumerate() {
+            for (col, pixel) in pixels.iter().enumerate() {
+                if pixel.is_some() {
+                    self.screen[pos.1 + row][pos.0 + col] = Some(pixel.unwrap());
+                }
+            }
+        }
+    }
+
     fn draw_screen(&mut self) {
         self.clear_screen();
 
-        self.player.draw(&mut self.screen);
+        self.draw_sprite_at(self.player.pos(), &self.player.sprite());
 
-        for s in &self.pshots {
-            s.draw(&mut self.screen);
-        }
+        // for s in &self.pshots {
+        //     s.draw(&mut self.screen);
+        // }
     }
 
     fn clear_screen(&mut self) {

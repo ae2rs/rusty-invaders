@@ -1,5 +1,6 @@
-mod enemy;
-mod pixel;
+mod asset;
+mod render;
+
 mod player;
 mod shot;
 mod traits;
