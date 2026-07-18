@@ -46,28 +46,12 @@ impl FrameTimer {
             None
         }
     }
-    pub fn fps(&self) -> f64 {
-        self.displayed_fps
-    }
 
     fn limit_frame_rate(&self) {
         let elapsed = self.frame_start.elapsed();
 
         if elapsed < self.target_frame_time {
             thread::sleep(self.target_frame_time - elapsed);
-        }
-    }
-
-    fn update_fps(&mut self) {
-        self.frame_count += 1;
-
-        let elapsed = self.fps_window_start.elapsed();
-
-        if elapsed >= Duration::from_secs(1) {
-            self.displayed_fps = self.frame_count as f64 / elapsed.as_secs_f64();
-
-            self.frame_count = 0;
-            self.fps_window_start = Instant::now();
         }
     }
 }
