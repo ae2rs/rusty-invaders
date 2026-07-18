@@ -1,6 +1,5 @@
 use crate::bullet::Bullet;
 use crate::player::Player;
-use crate::render::Sprite;
 
 pub enum Entity {
     Player(Player),
@@ -23,14 +22,14 @@ impl Entity {
         }
     }
 
-    pub fn velocity(&self) -> (i32, i32) {
+    pub fn velocity(&self) -> (isize, isize) {
         match self {
             Entity::Player(player) => player.velocity(),
             Entity::Bullet(bullet) => bullet.velocity(),
         }
     }
 
-    pub fn set_velocity(&mut self, velocity: (i32, i32)) {
+    pub fn set_velocity(&mut self, velocity: (isize, isize)) {
         match self {
             Entity::Player(player) => player.set_velocity(velocity),
             Entity::Bullet(bullet) => bullet.set_velocity(velocity),
@@ -51,13 +50,6 @@ impl Entity {
         match self {
             Entity::Player(_) => true,
             _ => false,
-        }
-    }
-
-    pub fn as_player(&self) -> Option<&Player> {
-        match self {
-            Entity::Player(player) => Some(player),
-            _ => None,
         }
     }
 

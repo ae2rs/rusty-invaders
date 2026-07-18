@@ -16,7 +16,7 @@ pub struct Player {
     pos: (usize, usize),
     dims: (usize, usize),
     sprite: Sprite,
-    velocity: (i32, i32),
+    velocity: (isize, isize),
 
     last_shot: Instant,
 }
@@ -46,11 +46,11 @@ impl Player {
         self.pos = pos;
     }
 
-    pub fn velocity(&self) -> (i32, i32) {
+    pub fn velocity(&self) -> (isize, isize) {
         self.velocity
     }
 
-    pub fn set_velocity(&mut self, velocity: (i32, i32)) {
+    pub fn set_velocity(&mut self, velocity: (isize, isize)) {
         self.velocity = velocity;
     }
 

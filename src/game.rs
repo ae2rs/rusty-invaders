@@ -71,17 +71,31 @@ impl Game {
 
     fn handle_input(&mut self) {
         let keys = self.window.get_keys();
-        let player = self.player();
+        let mut bullet = None;
+        let mut left_pressed = false;
+        let mut right_pressed = false;
 
-        for key in keys {
-            match key {
-                Key::Left => player.set_velocity((1, 0)),
-                Key::Right => player.set_velocity((-1, 0)),
-                Key::Space => {
-                    println!("Shoot!!");
+        {
+            let player = self.player();
+
+            for key in keys {
+                match key {
+                    Key::Left | Key::A => left_pressed = true,
+                    Key::Right | Key::D => right_pressed = true,
+                    Key::Space => bullet = player.shoot(),
+                    _ => {}
                 }
-                _ => {}
             }
+
+            match (left_pressed, right_pressed) {
+                (true, false) => player.set_velocity((1, 0)),
+                (false, true) => player.set_velocity((-1, 0)),
+                _ => player.set_velocity((0, 0)),
+            }
+        }
+
+        if let Some(bullet) = bullet {
+            self.world.entities.push(Entity::Bullet(bullet));
         }
     }
 
@@ -111,7 +125,6 @@ impl Game {
             }
 
             entity.set_pos(new_pos);
-            entity.set_velocity((0, 0));
         }
     }
 

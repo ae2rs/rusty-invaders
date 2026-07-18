@@ -10,7 +10,7 @@ pub enum BulletType {
 pub struct Bullet {
     pos: (usize, usize),
     dims: (usize, usize),
-    velocity: (i32, i32),
+    velocity: (isize, isize),
     sprite: Sprite,
 
     bullet_type: BulletType,
@@ -40,11 +40,11 @@ impl Bullet {
         self.pos = pos;
     }
 
-    pub fn velocity(&self) -> (i32, i32) {
+    pub fn velocity(&self) -> (isize, isize) {
         self.velocity
     }
 
-    pub fn set_velocity(&mut self, velocity: (i32, i32)) {
+    pub fn set_velocity(&mut self, velocity: (isize, isize)) {
         self.velocity = velocity;
     }
 
