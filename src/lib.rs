@@ -1,10 +1,11 @@
 mod asset;
 mod render;
 
-mod enemy;
+mod alien;
+mod bullet;
+mod entity;
 mod perf;
 mod player;
-mod shot;
 mod traits;
 
 pub mod game;

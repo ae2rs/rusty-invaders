@@ -28,7 +28,7 @@ impl Enemy {
         self.pos
     }
 
-    pub fn sprite(&self) -> Sprite {
-        self.sprite.clone()
+    pub fn sprite(&self) -> &Sprite {
+        &self.sprite
     }
 }

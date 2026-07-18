@@ -2,29 +2,33 @@ use crate::asset::sprite::shot::SCHEMA as SHOT_SCHEMA;
 use crate::render::Sprite;
 use crate::{game::WINDOW_PIXEL_HEIGHT, traits::Kinetic};
 
-pub enum ShotType {
+pub enum BulletType {
     Player,
-    #[expect(dead_code)]
     Enemy,
 }
 
-pub struct Shot {
+pub struct Bullet {
     pos: (usize, usize),
+    dims: (usize, usize),
+    velocity: (i32, i32),
     sprite: Sprite,
-    shot_type: ShotType,
+
+    bullet_type: BulletType,
 }
 
-impl Shot {
-    pub fn new(pos: (usize, usize), shot_type: ShotType) -> Self {
+impl Bullet {
+    pub fn new(pos: (usize, usize), bullet_type: BulletType) -> Self {
         Self {
             pos,
+            dims: (1, 2),
+            velocity: (0, 1),
             sprite: Sprite::from_asset(
                 &SHOT_SCHEMA[..]
                     .iter()
                     .map(|inner| inner as &[u8])
                     .collect::<Vec<&[u8]>>(),
             ),
-            shot_type,
+            bullet_type,
         }
     }
 
@@ -32,15 +36,27 @@ impl Shot {
         self.pos
     }
 
-    pub fn sprite(&self) -> Sprite {
-        self.sprite.clone()
+    pub fn set_pos(&mut self, pos: (usize, usize)) {
+        self.pos = pos;
+    }
+
+    pub fn velocity(&self) -> (i32, i32) {
+        self.velocity
+    }
+
+    pub fn set_velocity(&mut self, velocity: (i32, i32)) {
+        self.velocity = velocity;
+    }
+
+    pub fn sprite(&self) -> &Sprite {
+        &self.sprite
     }
 }
 
-impl Kinetic for Shot {
+impl Kinetic for Bullet {
     fn translate(&mut self) -> bool {
-        match self.shot_type {
-            ShotType::Player => {
+        match self.bullet_type {
+            BulletType::Player => {
                 if self.pos.1 == 0 {
                     false
                 } else {
@@ -48,7 +64,7 @@ impl Kinetic for Shot {
                     true
                 }
             }
-            ShotType::Enemy => {
+            BulletType::Enemy => {
                 if self.pos.1 == WINDOW_PIXEL_HEIGHT - 1 {
                     false
                 } else {
